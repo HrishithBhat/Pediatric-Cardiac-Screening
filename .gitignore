@@ -40,9 +40,35 @@ checkpoints/
 data/ultrasound/
 data/xray/
 data/audio/
+data/multimodal/
 
 # Keep the template only
 !data/labels_template.csv
+
+# =============================================================================
+#  Inference outputs & uploads
+# =============================================================================
+inference/uploads/
+inference/results/
+inference/reports/
+*.json
+!requirements*.json
+
+# =============================================================================
+#  Explainability / GradCAM outputs
+# =============================================================================
+explainability/outputs/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+# Keep dataset image files (tracked via CSV paths, not committed anyway)
+
+# =============================================================================
+#  Phase run logs
+# =============================================================================
+logs/phase1_run.log
+logs/phase2_run.log
 
 # =============================================================================
 #  TensorBoard / training logs

@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -105,7 +105,7 @@ def train_one_epoch(
         label = batch["label"].unsqueeze(1).to(device)
 
         optimizer.zero_grad()
-        with autocast(enabled=CFG.train.amp):
+        with autocast("cuda", enabled=CFG.train.amp):
             logit, gate_weights = model(audio_spec, us_image, xray_image)
             loss = criterion(logit, label)
 
@@ -160,7 +160,7 @@ def validate(
         xray_image = batch["xray_image"].to(device)
         label = batch["label"].unsqueeze(1).to(device)
 
-        with autocast(enabled=CFG.train.amp):
+        with autocast("cuda", enabled=CFG.train.amp):
             logit, _ = model(audio_spec, us_image, xray_image)
             loss = criterion(logit, label)
 
@@ -188,10 +188,15 @@ def train_gmu(
     val_csv: str,
     output_dir: str = "checkpoints",
     resume_gmu: str | None = None,
+    patience: int = 10,
+    batch_size: int | None = None,
 ):
     set_seed(CFG.train.seed)
     device = torch.device(CFG.train.device if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+    effective_batch = batch_size if batch_size is not None else CFG.train.gmu_batch_size
+    print(f"Device: {device} | Batch size: {effective_batch}")
     os.makedirs(output_dir, exist_ok=True)
     writer = SummaryWriter(log_dir=os.path.join(CFG.train.log_dir, "gmu"))
 
@@ -226,7 +231,7 @@ def train_gmu(
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=CFG.train.gmu_batch_size,
+        batch_size=effective_batch,
         shuffle=True,
         num_workers=CFG.train.num_workers,
         collate_fn=collate_fn,
@@ -234,7 +239,7 @@ def train_gmu(
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=CFG.train.gmu_batch_size,
+        batch_size=effective_batch,
         shuffle=False,
         num_workers=CFG.train.num_workers,
         collate_fn=collate_fn,
@@ -253,7 +258,7 @@ def train_gmu(
     )
     pos_weight = torch.tensor([4.0], device=device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    scaler = GradScaler(enabled=CFG.train.amp)
+    scaler = GradScaler("cuda", enabled=CFG.train.amp)
 
     # ── Optional resume ──
     start_epoch = 0
@@ -268,6 +273,7 @@ def train_gmu(
         print(f"Resumed from epoch {start_epoch}")
 
     # ── Training Loop ──
+    patience_counter = 0
     for epoch in range(start_epoch, CFG.train.gmu_epochs):
         t0 = time.time()
         tr_loss, tr_met = train_one_epoch(
@@ -293,6 +299,9 @@ def train_gmu(
         is_best = val_met["f1"] > best_f1
         if is_best:
             best_f1 = val_met["f1"]
+            patience_counter = 0
+        else:
+            patience_counter += 1
 
         ckpt = {
             "epoch": epoch,
@@ -306,6 +315,10 @@ def train_gmu(
         if is_best:
             torch.save(ckpt, os.path.join(output_dir, "gmu_best.pth"))
             print(f"  ✓ New best GMU saved: F1={best_f1:.3f}")
+
+        if patience_counter >= patience:
+            print(f"  ⏹ Early stopping: no improvement for {patience} epochs.")
+            break
 
     writer.close()
     print(f"GMU training complete. Best F1: {best_f1:.3f}")
@@ -325,6 +338,10 @@ if __name__ == "__main__":
     parser.add_argument("--val_csv", required=True)
     parser.add_argument("--output_dir", default="checkpoints")
     parser.add_argument("--resume_gmu", default=None)
+    parser.add_argument("--patience", type=int, default=10,
+                        help="Early stopping patience in epochs (default: 10)")
+    parser.add_argument("--batch_size", type=int, default=None,
+                        help="Override batch size (default: from config)")
     args = parser.parse_args()
 
     train_gmu(
@@ -335,4 +352,6 @@ if __name__ == "__main__":
         val_csv=args.val_csv,
         output_dir=args.output_dir,
         resume_gmu=args.resume_gmu,
+        patience=args.patience,
+        batch_size=args.batch_size,
     )

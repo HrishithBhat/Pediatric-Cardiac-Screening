@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -136,7 +136,7 @@ def train_one_epoch(
         inp = batch["image"].to(device)  # unified key from single-modality datasets
 
         optimizer.zero_grad()
-        with autocast(enabled=CFG.train.amp):
+        with autocast("cuda", enabled=CFG.train.amp):
             logit = model(inp)          # (B, 1)
             loss = criterion(logit, label)
 
@@ -182,7 +182,7 @@ def validate(
         label = batch["label"].unsqueeze(1).to(device)
         inp = batch["image"].to(device)  # unified key from single-modality datasets
 
-        with autocast(enabled=CFG.train.amp):
+        with autocast("cuda", enabled=CFG.train.amp):
             logit = model(inp)
             loss = criterion(logit, label)
 
@@ -208,10 +208,18 @@ def train_specialist(
     val_csv: str,
     output_dir: str = "checkpoints",
     resume: str | None = None,
+    patience: int = 7,
+    batch_size: int | None = None,
 ):
     set_seed(CFG.train.seed)
     device = torch.device(CFG.train.device if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device} | Modality: {modality}")
+
+    # Free any leftover GPU memory from previous runs
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+
+    effective_batch = batch_size if batch_size is not None else CFG.train.specialist_batch_size
+    print(f"Device: {device} | Modality: {modality} | Batch size: {effective_batch}")
 
     os.makedirs(output_dir, exist_ok=True)
     writer = SummaryWriter(log_dir=os.path.join(CFG.train.log_dir, modality))
@@ -225,14 +233,14 @@ def train_specialist(
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=CFG.train.specialist_batch_size,
+        batch_size=effective_batch,
         shuffle=True,
         num_workers=CFG.train.num_workers,
         pin_memory=True,
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=CFG.train.specialist_batch_size,
+        batch_size=effective_batch,
         shuffle=False,
         num_workers=CFG.train.num_workers,
         pin_memory=True,
@@ -256,7 +264,7 @@ def train_specialist(
     # Positive-weight for class imbalance (assume ~20% positive)
     pos_weight = torch.tensor([4.0], device=device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    scaler = GradScaler(enabled=CFG.train.amp)
+    scaler = GradScaler("cuda", enabled=CFG.train.amp)
 
     # ── Optional resume ──
     start_epoch = 0
@@ -269,7 +277,8 @@ def train_specialist(
         best_acc = ckpt.get("best_acc", 0.0)
         print(f"Resumed from epoch {start_epoch}")
 
-    # ── Training Loop ──
+    # Early stopping state
+    patience_counter = 0
     for epoch in range(start_epoch, CFG.train.specialist_epochs):
         t0 = time.time()
         tr_loss, tr_met = train_one_epoch(
@@ -297,6 +306,9 @@ def train_specialist(
         is_best = val_met["accuracy"] > best_acc
         if is_best:
             best_acc = val_met["accuracy"]
+            patience_counter = 0
+        else:
+            patience_counter += 1
 
         ckpt = {
             "epoch": epoch,
@@ -313,6 +325,10 @@ def train_specialist(
             best_path = os.path.join(output_dir, f"{modality}_best.pth")
             torch.save(ckpt, best_path)
             print(f"  ✓ New best saved: acc={best_acc:.3f}")
+
+        if patience_counter >= patience:
+            print(f"  ⏹ Early stopping: no improvement for {patience} epochs.")
+            break
 
         if best_acc >= 0.85:
             print(f"  ✓ Target accuracy 85% reached. Phase-1 training complete.")
@@ -333,6 +349,10 @@ if __name__ == "__main__":
     parser.add_argument("--val_csv", required=True)
     parser.add_argument("--output_dir", default="checkpoints")
     parser.add_argument("--resume", default=None)
+    parser.add_argument("--patience", type=int, default=7,
+                        help="Early stopping patience (default: 7 epochs)")
+    parser.add_argument("--batch_size", type=int, default=None,
+                        help="Override batch size (default: from config, 32)")
     args = parser.parse_args()
 
     train_specialist(
@@ -341,4 +361,6 @@ if __name__ == "__main__":
         val_csv=args.val_csv,
         output_dir=args.output_dir,
         resume=args.resume,
+        patience=args.patience,
+        batch_size=args.batch_size,
     )
