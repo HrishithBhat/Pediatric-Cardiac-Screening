@@ -7,21 +7,20 @@ export default function App() {
 
   return (
     <div className="container">
-      <h1>🫀 Autonomous Pediatric Cardiac Screening</h1>
-      <p className="muted">Upload a WAV and/or ultrasound / x-ray images. AI will analyze all available modalities.</p>
+      <header className="page-header">
+        <div className="brand-mark" aria-hidden="true">♥</div>
+        <div>
+          <p className="eyebrow">Clinical screening workspace</p>
+          <h1>Autonomous Pediatric Cardiac Screening</h1>
+          <p className="muted">Upload a WAV and/or ultrasound / X-ray images. AI will analyze all available modalities.</p>
+        </div>
+      </header>
       {/* PHASE 1 (50%): Currently showing only audio + ultrasound models. Phase 2 will add X-ray + fusion. */}
       
-      <div style={{ marginBottom: '20px' }}>
-        <button 
+      <div className="toolbar">
+        <button
+          className="metrics-toggle"
           onClick={() => setShowMetrics(!showMetrics)}
-          style={{ 
-            padding: '8px 16px', 
-            background: '#457b9d', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
         >
           {showMetrics ? '👉 Hide' : '📊 Show'} Model Performance Proof
         </button>
@@ -29,7 +28,7 @@ export default function App() {
 
       {showMetrics && <ModelMetrics />}
       
-      <hr style={{ borderColor: '#457b9d', margin: '20px 0' }} />
+      <hr />
       
       <UploadForm />
     </div>

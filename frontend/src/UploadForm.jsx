@@ -70,15 +70,15 @@ export default function UploadForm() {
       {report && (
         <div className="results-panel">
           {/* Phase 1: Individual Model Predictions */}
-          <div style={{ padding: '16px', background: 'rgba(26, 58, 82, 0.6)', borderRadius: '6px', marginBottom: '16px' }}>
+          <div className="result-section specialist-results" style={{ padding: '16px', background: 'rgba(26, 58, 82, 0.6)', borderRadius: '6px', marginBottom: '16px' }}>
             <h3 style={{ color: '#1abc9c', marginTop: 0 }}>📊 Individual Model Predictions</h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
+            <div className="specialist-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
               {/* Audio Model Result */}
               {report.audio_prediction !== undefined && (
-                <div style={{ padding: '12px', background: 'rgba(52, 152, 219, 0.2)', borderLeft: '3px solid #3498db', borderRadius: '4px' }}>
+                <div className={`specialist-card prediction-card ${report.audio_prediction > 0.5 ? 'prediction-abnormal' : 'prediction-normal'}`} style={{ padding: '12px', background: 'rgba(52, 152, 219, 0.2)', borderLeft: '3px solid #3498db', borderRadius: '4px' }}>
                   <h4 style={{ color: '#3498db', marginTop: 0 }}>🎧 Audio Model (CRNN2D)</h4>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className="prediction-details" style={{ marginTop: '8px' }}>
                     <p><strong>Probability:</strong> {(report.audio_prediction * 100).toFixed(1)}%</p>
                     <p><strong>Status:</strong> {report.audio_prediction > 0.5 ? '⚠️ Abnormal' : '✓ Normal'}</p>
                     <p style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>Accuracy: 80.1% | Sensitivity: 82%</p>
@@ -88,9 +88,9 @@ export default function UploadForm() {
 
               {/* Ultrasound Model Result */}
               {report.ultrasound_prediction !== undefined && (
-                <div style={{ padding: '12px', background: 'rgba(46, 204, 113, 0.2)', borderLeft: '3px solid #2ecc71', borderRadius: '4px' }}>
+                <div className={`specialist-card prediction-card ${report.ultrasound_prediction > 0.5 ? 'prediction-abnormal' : 'prediction-normal'}`} style={{ padding: '12px', background: 'rgba(46, 204, 113, 0.2)', borderLeft: '3px solid #2ecc71', borderRadius: '4px' }}>
                   <h4 style={{ color: '#2ecc71', marginTop: 0 }}>🫀 Ultrasound Model (NTS-Net)</h4>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className="prediction-details" style={{ marginTop: '8px' }}>
                     <p><strong>Probability:</strong> {(report.ultrasound_prediction * 100).toFixed(1)}%</p>
                     <p><strong>Status:</strong> {report.ultrasound_prediction > 0.5 ? '⚠️ Abnormal' : '✓ Normal'}</p>
                     <p style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>Accuracy: 97.6% | Sensitivity: 98%</p>
@@ -106,11 +106,11 @@ export default function UploadForm() {
 
           {/* Phase 1: X-Ray Model Individual Output */}
           {report.xray_prediction !== undefined && (
-            <div style={{ padding: '16px', background: 'rgba(26, 58, 82, 0.6)', borderRadius: '6px', marginBottom: '16px' }}>
+            <div className="result-section specialist-results xray-results" style={{ padding: '16px', background: 'rgba(26, 58, 82, 0.6)', borderRadius: '6px', marginBottom: '16px' }}>
               <h3 style={{ color: '#e74c3c', marginTop: 0 }}>📊 X-Ray Prediction (EfficientNetV2)</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginTop: '12px' }}>
-                <div style={{ padding: '12px', background: 'rgba(231, 76, 60, 0.2)', borderLeft: '3px solid #e74c3c', borderRadius: '4px' }}>
-                  <div style={{ marginTop: '8px' }}>
+              <div className="specialist-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginTop: '12px' }}>
+                <div className={`specialist-card prediction-card ${report.xray_prediction > 0.5 ? 'prediction-abnormal' : 'prediction-normal'}`} style={{ padding: '12px', background: 'rgba(231, 76, 60, 0.2)', borderLeft: '3px solid #e74c3c', borderRadius: '4px' }}>
+                  <div className="prediction-details" style={{ marginTop: '8px' }}>
                     <p><strong>Probability:</strong> {(report.xray_prediction * 100).toFixed(1)}%</p>
                     <p><strong>Status:</strong> {report.xray_prediction > 0.5 ? '⚠️ Abnormal' : '✓ Normal'}</p>
                     <p style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>Accuracy: 89.4% | Sensitivity: 91%</p>
