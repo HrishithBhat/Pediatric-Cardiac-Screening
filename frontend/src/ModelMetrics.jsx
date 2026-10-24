@@ -17,7 +17,7 @@ const BarChart = ({ value, color = '#1abc9c' }) => (
         transition: 'width 0.3s'
       }}></div>
     </div>
-    <span style={{ color: '#e0e0e0', fontWeight: '600', minWidth: '50px' }}>
+    <span style={{ color: '#000000', fontWeight: '600', minWidth: '50px' }}>
       {(value * 100).toFixed(1)}%
     </span>
   </div>
@@ -82,7 +82,7 @@ const ModelMetrics = () => {
     <div className="metrics-container">
       <h2>📊 Model Performance Proof</h2>
       <p className="metrics-subtitle">
-        Here's how accurate our AI doctors are. Each "specialist" was trained on hundreds of real patient cases and tested on new cases they've never seen before.
+        Here's how accurate the Multimodal Pediatric Screening System is. Each specialist was trained on hundreds of real patient cases and tested on new cases they have never seen before.
       </p>
 
       {/* Metrics Grid */}
@@ -117,21 +117,21 @@ const ModelMetrics = () => {
           <div className="refer-item refer">
             <h4>🚨 REFER: ≥50% Probability</h4>
             <p>
-              The AI detected signs that suggest heart disease might be present. This means:
+              The Multimodal Pediatric Screening System detected signs that suggest heart disease might be present. This means:
             </p>
             <ul>
-              <li>Heart chambers look enlarged or abnormal shape</li>
+              <li>Heart chambers look enlarged or abnormal in shape</li>
               <li>Blood flow patterns are unusual</li>
               <li>Heart sounds show concerning patterns</li>
             </ul>
             <p><strong>Action:</strong> See a pediatric cardiologist immediately for expert evaluation.</p>
-            <p className="note">⚠️ The AI is 92% sensitive—it rarely misses real disease.</p>
+            <p className="note">⚠️ The system is 92% sensitive—it rarely misses real disease.</p>
           </div>
 
           <div className="refer-item pass">
             <h4>✅ PASS: &lt;50% Probability</h4>
             <p>
-              The AI found no concerning signs. This typically means:
+              The Multimodal Pediatric Screening System found no concerning signs. This typically means:
             </p>
             <ul>
               <li>Heart chambers and size look normal</li>
@@ -139,24 +139,24 @@ const ModelMetrics = () => {
               <li>Heart sounds are regular</li>
             </ul>
             <p><strong>Action:</strong> Continue normal follow-up. No immediate cardiology referral needed.</p>
-            <p className="note">✓ The AI is 95% specific—it rarely sounds false alarms.</p>
+            <p className="note">✓ The system is 95% specific—it rarely produces false alarms.</p>
           </div>
         </div>
 
         <div className="disclaimer-box">
-          ⚠️ <strong>IMPORTANT:</strong> This AI is a screening tool, not a diagnosis. Always consult a cardiologist for final medical decisions. The AI is trained to catch potential disease (high sensitivity) but may have false positives that only a doctor can rule out.
+          ⚠️ <strong>IMPORTANT:</strong> This Multimodal Pediatric Screening System is a screening tool, not a diagnosis. Always consult a cardiologist for final medical decisions. The system is trained to catch potential disease (high sensitivity) but may have false positives that only a doctor can rule out.
         </div>
       </div>
 
       {/* How It Works */}
       <div className="how-it-works">
-        <h3>🔍 How Does This AI Work?</h3>
+        <h3>🔍 How Does This Multimodal Pediatric Screening System Work?</h3>
 
         <div className="steps">
           <div className="step">
             <h4>Step 1️⃣: Three Experts Listen</h4>
             <p>
-              Three separate AI "specialists" analyze your data:
+              Three separate screening specialists analyze your data:
             </p>
             <ul style={{ margin: '6px 0', paddingLeft: '20px' }}>
               <li>🎧 One listens to heart sounds</li>
@@ -169,14 +169,14 @@ const ModelMetrics = () => {
           <div className="step">
             <h4>Step 2️⃣: They Vote Intelligently</h4>
             <p>
-              The three specialists don't just vote equally. The system learns that:
+              The three specialists do not simply vote equally. The system learns that:
             </p>
             <ul style={{ margin: '6px 0', paddingLeft: '20px' }}>
               <li><strong>Ultrasound is 97.6% accurate</strong> → gets more weight</li>
               <li><strong>Audio is 80.1% accurate</strong> → gets less weight</li>
               <li><strong>X-Ray is 89.4% accurate</strong> → gets medium weight</li>
             </ul>
-            <p>It's like asking a PhD and a student for advice—you trust the PhD more.</p>
+            <p>It is like asking a specialist and a trainee for advice—you trust the specialist more.</p>
           </div>
 
           <div className="step">
@@ -188,7 +188,7 @@ const ModelMetrics = () => {
               <li><strong>≥50% probability</strong> = REFER (suspicion of disease)</li>
               <li><strong>&lt;50% probability</strong> = PASS (normal)</li>
             </ul>
-            <p>The final AI reaches <strong>94.6% accuracy</strong>—better than any single specialist!</p>
+            <p>The final multimodal decision reaches <strong>94.6% accuracy</strong>—better than any single specialist!</p>
           </div>
         </div>
       </div>

@@ -106,10 +106,37 @@ export default function UploadForm() {
 
           {/* Phase 1: X-Ray Model Individual Output */}
           {report.xray_prediction !== undefined && (
-            <div className="result-section specialist-results xray-results" style={{ padding: '16px', background: 'rgba(26, 58, 82, 0.6)', borderRadius: '6px', marginBottom: '16px' }}>
-              <h3 style={{ color: '#e74c3c', marginTop: 0 }}>📊 X-Ray Prediction (EfficientNetV2)</h3>
-              <div className="specialist-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginTop: '12px' }}>
-                <div className={`specialist-card prediction-card ${report.xray_prediction > 0.5 ? 'prediction-abnormal' : 'prediction-normal'}`} style={{ padding: '12px', background: 'rgba(231, 76, 60, 0.2)', borderLeft: '3px solid #e74c3c', borderRadius: '4px' }}>
+            <div
+              className="result-section specialist-results xray-results"
+              style={{
+                padding: '16px',
+                background: 'rgba(26, 58, 82, 0.6)',
+                borderRadius: '6px',
+                marginBottom: '16px'
+              }}
+            >
+              <h3
+                style={{
+                  color: report.xray_prediction > 0.5 ? '#e74c3c' : '#2ecc71',
+                  marginTop: 0
+                }}
+              >
+                📊 X-Ray Prediction (EfficientNetV2)
+              </h3>
+
+              <div
+                className="specialist-grid"
+                style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginTop: '12px' }}
+              >
+                <div
+                  className={`specialist-card prediction-card ${report.xray_prediction > 0.5 ? 'prediction-abnormal' : 'prediction-normal'}`}
+                  style={{
+                    padding: '12px',
+                    background: report.xray_prediction > 0.5 ? 'rgba(231, 76, 60, 0.2)' : 'rgba(46, 204, 113, 0.2)',
+                    borderLeft: `3px solid ${report.xray_prediction > 0.5 ? '#e74c3c' : '#2ecc71'}`,
+                    borderRadius: '4px'
+                  }}
+                >
                   <div className="prediction-details" style={{ marginTop: '8px' }}>
                     <p><strong>Probability:</strong> {(report.xray_prediction * 100).toFixed(1)}%</p>
                     <p><strong>Status:</strong> {report.xray_prediction > 0.5 ? '⚠️ Abnormal' : '✓ Normal'}</p>

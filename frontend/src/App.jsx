@@ -11,7 +11,7 @@ export default function App() {
         <div className="brand-mark" aria-hidden="true">♥</div>
         <div>
           <p className="eyebrow">Clinical screening workspace</p>
-          <h1>Autonomous Pediatric Cardiac Screening</h1>
+          <h1>Multimodal Pediatric Screening System For Congenital Heart Disease (CHD)</h1>
           <p className="muted">Upload a WAV and/or ultrasound / X-ray images. AI will analyze all available modalities.</p>
         </div>
       </header>
